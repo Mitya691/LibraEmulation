@@ -4,37 +4,55 @@
         Title="Эмулятор Весов" Height="450" Width="600">
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" MinHeight="31.96"/>
+            <RowDefinition Height="Auto" MinHeight="37.96"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
+
         <!-- Настройка соединения -->
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
             <TextBlock Text="Порт:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <ComboBox Width="100" ItemsSource="{Binding AvailablePorts}" 
-                      SelectedItem="{Binding SelectedPort}" Margin="0,0,10,0"/>
+            <ComboBox Width="100" ItemsSource="{Binding AvailablePorts}" SelectedItem="{Binding SelectedPort}" Margin="0,0,10,0"/>
             <TextBlock Text="Скорость:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <ComboBox Width="100" ItemsSource="{Binding BaudRates}" 
-                      SelectedItem="{Binding SelectedBaud}" Margin="0,0,10,0"/>
+            <ComboBox Width="100" ItemsSource="{Binding BaudRates}" SelectedItem="{Binding SelectedBaud}" Margin="0,0,10,0"/>
             <TextBlock Text="Четность:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <ComboBox Width="100" ItemsSource="{Binding Parities}" 
-                      SelectedItem="{Binding SelectedParity}" Margin="0,0,10,0"/>
+            <ComboBox Width="100" ItemsSource="{Binding Parities}" SelectedItem="{Binding SelectedParity}" Margin="0,0,10,0"/>
         </StackPanel>
+
         <!-- Параметры веса -->
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,10,0,10">
             <TextBlock Text="Вес (кг):" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <TextBox Width="100" Text="{Binding Weight, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
             <CheckBox Content="Успокоение" IsChecked="{Binding IsUspokoenie}" Margin="0,0,10,0"/>
             <CheckBox Content="Перегруз" IsChecked="{Binding IsPereg}" Margin="0,0,10,0"/>
         </StackPanel>
+
         <!-- Фиксированный адрес и кнопка управления -->
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,0,0,10">
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,10">
             <TextBlock Text="Фиксированный адрес (дец.):" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Width="50" Text="{Binding FixedAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
-            <Button Content="{Binding StartStopButtonText}" Command="{Binding StartStopCommand}" Width="100"/>
+            <TextBox Width="50" Text="{Binding FixedAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" Height="16"/>
+            <Button Content="{Binding StartStopButtonText}" Command="{Binding StartStopCommand}" Width="100" Height="25"/>
         </StackPanel>
+
+        <!-- Состояния системы -->
+        <StackPanel Grid.Row="3" Orientation="Vertical" Margin="0,0,0,164" HorizontalAlignment="Left" Width="158">
+            <CheckBox Content="На проход (D0)" IsChecked="{Binding IsOnPass, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Content="Разгрузка (D1)" IsChecked="{Binding IsUnloading, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Content="Загрузка (D2)" IsChecked="{Binding IsLoading, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Content="Пауза/Блокировка (D3)" IsChecked="{Binding IsPaused, Mode=TwoWay}" Margin="5"/>
+        </StackPanel>
+
+        <!-- Состояния системы -->
+        <StackPanel Grid.Row="3" Orientation="Vertical" Margin="0,0,0,168" HorizontalAlignment="Center" Width="188">
+            <CheckBox Content="Режим перевешивания (D7)" IsChecked="{Binding IsReweighing, Mode=TwoWay}" Margin="5" Width="179"/>
+            <CheckBox Content="Ошибка (D6)" IsChecked="{Binding HasErro, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Content="Режим 'СТОП' (D5)" IsChecked="{Binding IsStopMode, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Content="Цикл набора завершен (D4)" IsChecked="{Binding IsCycleComplete, Mode=TwoWay}" Margin="5"/>
+        </StackPanel>
+
         <!-- Лог обмена -->
-        <TextBox Grid.Row="3" Text="{Binding LogText}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
+        <TextBox Grid.Row="3" Text="{Binding LogText}" IsReadOnly="True" 
+                 VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" Margin="0,105,0,0"/>
     </Grid>
 </Window>

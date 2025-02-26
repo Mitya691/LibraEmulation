@@ -26,6 +26,16 @@ namespace ScaleEmulator
         public event Action<string> ErrorMessage;
         public event Action HandshakeCompleted;
 
+
+        public bool IsReweighing { get; set; }
+        public bool HasError { get; set; }
+        public bool IsStopMode { get; set; }
+        public bool IsCycleComplete { get; set; }
+        public bool IsPaused { get; set; }
+        public bool IsLoading { get; set; }
+        public bool IsUnloading { get; set; }
+        public bool IsOnPass { get; set; }
+
         public SerialPortService()
         {
             _timeoutTimer = new DispatcherTimer();
@@ -145,6 +155,7 @@ namespace ScaleEmulator
             {
                 byte[] bcdWeight = ConvertWeightToBCD(_currentWeight);
                 byte con = 0;
+                if (_isUspokoenie) { }
                 if (_currentWeight < 0)
                     con |= 0x80;
                 // Для БРУТТО D5 остаётся 0
@@ -161,9 +172,15 @@ namespace ScaleEmulator
             else if (cop == 0xBF)
             {
                 byte status = 0;
-                status |= 0x80; // D7 = 1: режим перевешивания
-                status |= 0x40; // D6 = 1: сообщение об ошибке
-                status |= 0x20; // D5 = 1: режим "СТОП"
+                if (IsReweighing) status |= 0x80; // D7 = 1: режим перевешивания
+                if (HasError) status |= 0x40; // D6 = 1: сообщение об ошибке
+                if (IsStopMode) status |= 0x20; // D5 = 1: режим "СТОП"
+                if (IsCycleComplete) status |= 0x10; // D4 = 1: завершён цикл набора отвеса
+                if (IsPaused) status |= 0x08; // D3 = 1: режим ПАУЗА/БЛОКИРОВКА
+                if (IsLoading) status |= 0x04; // D2 = 1: идет загрузка весового бункера
+                if (IsUnloading) status |= 0x02; // D1 = 1: идет разгрузка весового бункера
+                if (IsOnPass) status |= 0x01; // D0 = 1: включен режим "на проход"
+
                 byte[] responseData = new byte[] { adr, cop, status, 0x00 };
                 byte crc = CalcCRC(responseData);
                 byte[] response = CreateResponse(responseData, crc);

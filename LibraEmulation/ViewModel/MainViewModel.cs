@@ -6,12 +6,13 @@ using System.IO.Ports;
 using System.Linq;
 using System.Windows.Input;
 using ScaleEmulator;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LibraEmulation
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private readonly SerialPortService _serialService;
+        private readonly SerialPortService _serialPortService;
         private bool _isConnected = false;
         private string _logText = "";
         private string _startStopButtonText = "Старт";
@@ -81,6 +82,134 @@ namespace LibraEmulation
             set { _isPereg = value; OnPropertyChanged(nameof(IsPereg)); }
         }
 
+        private bool _isReweighing;
+        public bool IsReweighing
+        {
+            get => _isReweighing;
+            set
+            {
+                if (_isReweighing != value)
+                {
+                    _isReweighing = value;
+                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
+                    _serialPortService.IsReweighing = value;  // если вы реализовали аналогичное свойство в сервисе
+                    OnPropertyChanged(nameof(IsReweighing));
+                }
+            }
+        }
+
+        private bool _hasError;
+        public bool HasError
+        {
+            get => _hasError;
+            set
+            {
+                if (_hasError != value)
+                {
+                    _hasError = value;
+                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
+                    _serialPortService.HasError = value;  // если вы реализовали аналогичное свойство в сервисе
+                    OnPropertyChanged(nameof(HasError));
+                }
+            }
+        }
+
+        private bool _isStopMode;
+        public bool IsStopMode
+        {
+            get => _isStopMode;
+            set
+            {
+                if (_isStopMode != value)
+                {
+                    _isStopMode = value;
+                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
+                    _serialPortService.IsStopMode = value;  // если вы реализовали аналогичное свойство в сервисе
+                    OnPropertyChanged(nameof(IsStopMode));
+                }
+            }
+        }
+
+        private bool _isCycleComplete;
+        public bool IsCycleComplete
+        {
+            get => _isCycleComplete;
+            set
+            {
+                if (_isCycleComplete != value)
+                {
+                    _isCycleComplete = value;
+                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
+                    _serialPortService.IsCycleComplete = value;  // если вы реализовали аналогичное свойство в сервисе
+                    OnPropertyChanged(nameof(IsCycleComplete));
+                }
+            }
+        }
+
+        private bool _isPaused;
+        public bool IsPaused
+        {
+            get => _isPaused;
+            set
+            {
+                if (_isPaused != value)
+                {
+                    _isPaused = value;
+                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
+                    _serialPortService.IsPaused = value;  // если вы реализовали аналогичное свойство в сервисе
+                    OnPropertyChanged(nameof(IsPaused));
+                }
+            }
+        }
+
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set
+            {
+                if (_isLoading != value)
+                {
+                    _isLoading = value;
+                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
+                    _serialPortService.IsLoading = value;  // если вы реализовали аналогичное свойство в сервисе
+                    OnPropertyChanged(nameof(IsLoading));
+                }
+            }
+        }
+
+        private bool _isUnloading;
+        public bool IsUnloading
+        {
+            get => _isUnloading;
+            set
+            {
+                if (_isUnloading != value)
+                {
+                    _isUnloading = value;
+                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
+                    _serialPortService.IsUnloading = value;  // если вы реализовали аналогичное свойство в сервисе
+                    OnPropertyChanged(nameof(IsUnloading));
+                }
+            }
+        }
+
+        private bool _isOnPass;
+        public bool IsOnPass
+        {
+            get => _isOnPass;
+            set
+            {
+                if (_isOnPass != value)
+                {
+                    _isOnPass = value;
+                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
+                    _serialPortService.IsOnPass = value;  // если вы реализовали аналогичное свойство в сервисе
+                    OnPropertyChanged(nameof(IsOnPass));
+                }
+            }
+        }
+
         public ICommand StartStopCommand { get; set; }
 
         public MainViewModel()
@@ -97,10 +226,10 @@ namespace LibraEmulation
 
             StartStopCommand = new RelayCommand(ExecuteStartStop);
 
-            _serialService = new SerialPortService();
-            _serialService.LogMessage += AppendLog;
-            _serialService.ErrorMessage += AppendLog;
-            _serialService.HandshakeCompleted += () =>
+            _serialPortService = new SerialPortService();
+            _serialPortService.LogMessage += AppendLog;
+            _serialPortService.ErrorMessage += AppendLog;
+            _serialPortService.HandshakeCompleted += () =>
             {
                 AppendLog("Соединение установлено.");
                 // Здесь можно вызывать диалог через сервис, если требуется
@@ -113,7 +242,7 @@ namespace LibraEmulation
             {
                 try
                 {
-                    _serialService.Start(SelectedPort, SelectedBaud,
+                    _serialPortService.Start(SelectedPort, SelectedBaud,
                         (Parity)Enum.Parse(typeof(Parity), SelectedParity), FixedAddress, Weight,
                         IsUspokoenie, IsPereg, Weight); // Передаём начальный вес; остальные параметры для формирования ответа могут обновляться внутри сервиса
                     _isConnected = true;
@@ -127,7 +256,7 @@ namespace LibraEmulation
             }
             else
             {
-                _serialService.Stop();
+                _serialPortService.Stop();
                 _isConnected = false;
                 StartStopButtonText = "Старт";
                 AppendLog("Порт закрыт.");
