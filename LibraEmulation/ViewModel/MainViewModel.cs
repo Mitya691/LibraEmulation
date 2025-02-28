@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows.Input;
 using ScaleEmulator;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Windows.Threading;
 
 namespace LibraEmulation
 {
@@ -61,6 +62,69 @@ namespace LibraEmulation
             get => _logText;
             set { _logText = value; OnPropertyChanged(nameof(LogText)); }
         }
+
+        // ---------------------------
+        // Свойства для эмуляции циклического взвешивания зерна
+        // ---------------------------
+        // Текущий вес, который вводится пользователем (в кг)
+        private double _currentWeight;
+        public double CurrentWeight
+        {
+            get => _currentWeight;
+            set
+            {
+                if (_currentWeight != value)
+                {
+                    _currentWeight = value;
+                    OnPropertyChanged(nameof(CurrentWeight));
+                }
+            }
+        }
+
+        // Накопленный вес за всё время работы (в кг)
+        private double _cumulativeWeight;
+        public double CumulativeWeight
+        {
+            get => _cumulativeWeight;
+            set
+            {
+                if (_cumulativeWeight != value)
+                {
+                    _cumulativeWeight = value;
+                    OnPropertyChanged(nameof(CumulativeWeight));
+                }
+            }
+        }
+
+        // Производительность (в тоннах/час)
+        private double _performance;
+        public double Performance
+        {
+            get => _performance;
+            set
+            {
+                if (_performance != value)
+                {
+                    _performance = value;
+                    OnPropertyChanged(nameof(Performance));
+                }
+            }
+        }
+
+        // Время старта эмуляции (для расчёта производительности)
+        private DateTime _startTime;
+
+        // Команда сброса счетчика
+        public ICommand ResetCounterCommand { get; set; }
+
+        // Команда запуска/остановки эмуляции (COM-порт, весы и т.д.)
+        public ICommand StartStopCommand { get; set; }
+
+        // Команда для эмуляции цикла (можно запускать автоматически, см. ниже)
+        // Например, можно использовать DispatcherTimer, поэтому отдельная команда не нужна.
+
+        // Таймер для эмуляции цикла (10 секунд)
+        private readonly DispatcherTimer _cycleTimer;
 
         public string StartStopButtonText
         {
@@ -210,8 +274,6 @@ namespace LibraEmulation
             }
         }
 
-        public ICommand StartStopCommand { get; set; }
-
         public MainViewModel()
         {
             AvailablePorts = new ObservableCollection<string>(SerialPort.GetPortNames());
@@ -234,6 +296,56 @@ namespace LibraEmulation
                 AppendLog("Соединение установлено.");
                 // Здесь можно вызывать диалог через сервис, если требуется
             };
+
+            // Инициализируем свойства для эмуляции цикла
+            CurrentWeight = 0;
+            CumulativeWeight = 0;
+            Performance = 0;
+            _startTime = DateTime.Now;
+
+            ResetCounterCommand = new RelayCommand(o => ResetCounter());
+            // Команда для запуска/остановки (здесь можно добавить логику работы с COM-портом)
+
+            _cycleTimer = new DispatcherTimer();
+            _cycleTimer.Interval = TimeSpan.FromSeconds(10);
+            _cycleTimer.Tick += CycleTimer_Tick;
+        }
+
+        // Метод, вызываемый каждые 10 секунд (эмуляция цикла)
+        private void CycleTimer_Tick(object sender, EventArgs e)
+        {
+            // В цикле весы "накапливают" зерно.
+            // Здесь мы прибавляем текущий вес (введённый пользователем) к накопленному значению.
+            CumulativeWeight += CurrentWeight;
+
+            // Можно также сбрасывать CurrentWeight после цикла, если симулируется разрядка зерна:
+            // CurrentWeight = 0;
+
+            // Обновляем производительность
+            UpdatePerformance();
+
+            // Логируем событие цикла
+            LogText += $"{DateTime.Now:HH:mm:ss} Цикл завершён. Накоплено: {CumulativeWeight} кг\n";
+        }
+
+        // Расчёт производительности (тонн/час)
+        private void UpdatePerformance()
+        {
+            double elapsedHours = (DateTime.Now - _startTime).TotalHours;
+            if (elapsedHours > 0)
+            {
+                // Преобразуем накопленный вес в тонны (1 тонна = 1000 кг)
+                Performance = (CumulativeWeight / 1000) / elapsedHours;
+            }
+        }
+
+        // Команда сброса накопленного счетчика
+        private void ResetCounter()
+        {
+            CumulativeWeight = 0;
+            _startTime = DateTime.Now;
+            Performance = 0;
+            LogText += $"{DateTime.Now:HH:mm:ss} Счетчик сброшен.\n";
         }
 
         private void ExecuteStartStop(object parameter)
@@ -242,12 +354,21 @@ namespace LibraEmulation
             {
                 try
                 {
+                    // Запускаем подключение к COM-порту через сервис
                     _serialPortService.Start(SelectedPort, SelectedBaud,
-                        (Parity)Enum.Parse(typeof(Parity), SelectedParity), FixedAddress, Weight,
-                        IsUspokoenie, IsPereg, Weight); // Передаём начальный вес; остальные параметры для формирования ответа могут обновляться внутри сервиса
+                        (Parity)Enum.Parse(typeof(Parity), SelectedParity),
+                        FixedAddress, Weight, IsUspokoenie, IsPereg, Weight);
                     _isConnected = true;
+
+                    // Обновляем UI – меняем текст кнопки и логгируем
                     StartStopButtonText = "Стоп";
-                    AppendLog("Порт открыт.");
+                    AppendLog($"{DateTime.Now:HH:mm:ss} Порт открыт. Эмуляция запущена.");
+
+                    // Запускаем эмуляцию рабочего цикла (например, каждые 10 секунд)
+                    _startTime = DateTime.Now;
+                    _cycleTimer.Interval = TimeSpan.FromSeconds(10);
+                    _cycleTimer.Tick += CycleTimer_Tick;
+                    _cycleTimer.Start();
                 }
                 catch (Exception ex)
                 {
@@ -256,10 +377,12 @@ namespace LibraEmulation
             }
             else
             {
+                // Останавливаем работу COM-порта и эмуляцию
                 _serialPortService.Stop();
                 _isConnected = false;
                 StartStopButtonText = "Старт";
-                AppendLog("Порт закрыт.");
+                AppendLog($"{DateTime.Now:HH:mm:ss} Порт закрыт. Эмуляция остановлена.");
+                _cycleTimer.Stop();
             }
         }
 

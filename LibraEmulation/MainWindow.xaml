@@ -1,7 +1,7 @@
 ﻿<Window x:Class="LibraEmulation.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Эмулятор Весов" Height="450" Width="600">
+        Title="Эмулятор Весов" Height="600" Width="800">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" MinHeight="31.96"/>
@@ -29,10 +29,11 @@
         </StackPanel>
 
         <!-- Фиксированный адрес и кнопка управления -->
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,10">
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="343,6,15,7">
             <TextBlock Text="Фиксированный адрес (дец.):" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <TextBox Width="50" Text="{Binding FixedAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" Height="16"/>
-            <Button Content="{Binding StartStopButtonText}" Command="{Binding StartStopCommand}" Width="100" Height="25"/>
+            <Button Content="{Binding StartStopButtonText}" Command="{Binding StartStopCommand}" Width="67" Height="24" Margin="0, 0, 10, 0"/>
+            <Button Content="Сброс счетчика" Command="{Binding ResetCounterCommand}" Height="23" Width="94" RenderTransformOrigin="0.478,0.548"/>
         </StackPanel>
 
         <!-- Состояния системы -->
@@ -43,8 +44,22 @@
             <CheckBox Content="Пауза/Блокировка (D3)" IsChecked="{Binding IsPaused, Mode=TwoWay}" Margin="5"/>
         </StackPanel>
 
+        <!-- Счетчик и производительность -->
+        <StackPanel  Margin="356,6,15,443" Grid.Row="3" Orientation="Horizontal">
+            <TextBlock Text="Накопленный вес:" Height="20" Width="104" Margin="0 0 10 0"/>
+            <Border BorderBrush="Black" BorderThickness="1" CornerRadius="1" Height="19">
+                <TextBlock Text="{Binding CumulativeWeight}" Width="167" Height="21" Margin="0,-1,0,-3"/>
+            </Border>
+        </StackPanel>
+        <StackPanel  Margin="356,51,15,401" Grid.Row="3" Orientation="Horizontal">
+            <TextBlock Height="20" Width="125"  Margin ="0,0,10,0" Text="Производительность:"/>
+            <Border BorderBrush="Black" BorderThickness="1" CornerRadius="1" Height="19">
+                <TextBlock Text="{Binding CumulativeWeight}" Width="168" Height="21" Margin="0,-1,0,-3"/>
+            </Border>
+        </StackPanel>
+
         <!-- Состояния системы -->
-        <StackPanel Grid.Row="3" Orientation="Vertical" Margin="0,0,0,168" HorizontalAlignment="Center" Width="188">
+        <StackPanel Grid.Row="3" Orientation="Vertical" Margin="163,2,0,166" HorizontalAlignment="Left" Width="188">
             <CheckBox Content="Режим перевешивания (D7)" IsChecked="{Binding IsReweighing, Mode=TwoWay}" Margin="5" Width="179"/>
             <CheckBox Content="Ошибка (D6)" IsChecked="{Binding HasErro, Mode=TwoWay}" Margin="5"/>
             <CheckBox Content="Режим 'СТОП' (D5)" IsChecked="{Binding IsStopMode, Mode=TwoWay}" Margin="5"/>
