@@ -384,7 +384,6 @@ namespace LibraEmulation
                     // Запускаем эмуляцию рабочего цикла (например, каждые 10 секунд)
                     _startTime = DateTime.Now;
                     _cycleTimer.Interval = TimeSpan.FromSeconds(10);
-                    _cycleTimer.Tick += CycleTimer_Tick;
                     _cycleTimer.Start();
                 }
                 catch (Exception ex)
