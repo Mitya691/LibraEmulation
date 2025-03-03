@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibraEmulation.Model;
+using System;
 using System.IO.Ports;
 using System.Threading;
 using System.Windows.Threading;
@@ -26,7 +27,9 @@ namespace ScaleEmulator
         public event Action<string> ErrorMessage;
         public event Action HandshakeCompleted;
 
-
+        public double CurrentWeight { get; set; }
+        public bool IsUspokoenie { get; set; }
+        public bool IsPereg { get; set; }
         public bool IsReweighing { get; set; }
         public bool HasError { get; set; }
         public bool IsStopMode { get; set; }
@@ -35,6 +38,8 @@ namespace ScaleEmulator
         public bool IsLoading { get; set; }
         public bool IsUnloading { get; set; }
         public bool IsOnPass { get; set; }
+
+        private CounterModel _counterModel = new CounterModel();
 
         public SerialPortService()
         {
@@ -153,14 +158,13 @@ namespace ScaleEmulator
             // Обработка команды C3h – запрос веса БРУТТО (D5=0)
             else if (cop == 0xC3)
             {
-                byte[] bcdWeight = ConvertWeightToBCD(_currentWeight);
+                // Используем актуальное значение CurrentWeight, которое обновляется через привязку
+                byte[] bcdWeight = ConvertWeightToBCD(CurrentWeight);
                 byte con = 0;
-                if (_isUspokoenie) { }
-                if (_currentWeight < 0)
+                if (CurrentWeight < 0)
                     con |= 0x80;
-                // Для БРУТТО D5 остаётся 0
-                if (_isUspokoenie) con |= 0x10;
-                if (_isPereg) con |= 0x08;
+                if (IsUspokoenie) con |= 0x10;
+                if (IsPereg) con |= 0x08;
                 con |= 0x01; // позиция запятой
                 byte[] responseData = new byte[] { adr, cop, bcdWeight[0], bcdWeight[1], bcdWeight[2], con, 0x00 };
                 byte crc = CalcCRC(responseData);
@@ -187,23 +191,27 @@ namespace ScaleEmulator
                 _serialPort.Write(response, 0, response.Length);
                 LogMessage?.Invoke("Отправлено (Состояние BFh): " + BitConverter.ToString(response));
             }
-            // Обработка команды C8h – передать счетчик(и)
             else if (cop == 0xC8)
             {
                 if (buffer.Length >= 7)
                 {
-                    byte nw = buffer[3];
+                    byte nw = buffer[3]; // NW – номер запрашиваемого счётчика (0..9)
                     byte[] counterData;
-                    if (nw == 0x01 || (nw & 0x80) != 0)
+                    // Реализуем только счётчики с индексами 4 и 8
+                    if (nw == 0x04)
                     {
-                        // Пример: 51200 кг, представлено в 5-байтовом BCD как "00 12 05 00 00"
-                        counterData = new byte[] { 0x00, 0x12, 0x05, 0x00, 0x00 };
+                        counterData = _counterModel.GetCounterBCD(4);
+                    }
+                    else if (nw == 0x08)
+                    {
+                        counterData = _counterModel.GetCounterBCD(8);
                     }
                     else
                     {
-                        counterData = new byte[0];
+                        counterData = new byte[0]; // Для других значений ничего не передаём
                     }
-                    int len = 3 + counterData.Length + 1; // Adr, COP, NW, counterData, CRC
+
+                    int len = 3 + counterData.Length + 1; // Adr, COP, NW, счетчик(и), CRC
                     byte[] responseData = new byte[len];
                     responseData[0] = adr;
                     responseData[1] = cop;
@@ -212,11 +220,13 @@ namespace ScaleEmulator
                     responseData[responseData.Length - 1] = 0x00; // CRC placeholder
                     byte crc = CalcCRC(responseData);
                     responseData[responseData.Length - 1] = crc;
-                    byte[] response = new byte[responseData.Length + 2];
+
+                    byte[] response = new byte[responseData.Length + 3];
                     response[0] = 0xFF;
                     Array.Copy(responseData, 0, response, 1, responseData.Length);
                     response[response.Length - 2] = 0xFF;
                     response[response.Length - 1] = 0xFF;
+
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Счетчик C8h): " + BitConverter.ToString(response));
                 }

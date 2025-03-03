@@ -77,6 +77,7 @@ namespace LibraEmulation
                 {
                     _currentWeight = value;
                     OnPropertyChanged(nameof(CurrentWeight));
+                    _serialPortService.CurrentWeight = value; // синхронизируем с сервисом
                 }
             }
         }
@@ -136,14 +137,30 @@ namespace LibraEmulation
         public bool IsUspokoenie
         {
             get => _isUspokoenie;
-            set { _isUspokoenie = value; OnPropertyChanged(nameof(IsUspokoenie)); }
+            set
+            {
+                if (_isUspokoenie != value)
+                {
+                    _isUspokoenie = value;
+                    OnPropertyChanged(nameof(IsUspokoenie));
+                    _serialPortService.IsUspokoenie = value; // синхронизируем с сервисом
+                }
+            }
         }
 
         private bool _isPereg;
         public bool IsPereg
         {
             get => _isPereg;
-            set { _isPereg = value; OnPropertyChanged(nameof(IsPereg)); }
+            set
+            {
+                if (_isPereg != value)
+                {
+                    _isPereg = value;
+                    OnPropertyChanged(nameof(IsPereg));
+                    _serialPortService.IsPereg = value; // синхронизируем с сервисом
+                }
+            }
         }
 
         private bool _isReweighing;
