@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibraEmulation.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,26 @@ namespace LibraEmulation.View
         public LibraControl()
         {
             InitializeComponent();
+        }
+
+        public LibraModel ScaleModel
+        {
+            get { return (LibraModel)GetValue(ScaleModelProperty); }
+            set { SetValue(ScaleModelProperty, value); }
+        }
+
+        public static readonly DependencyProperty ScaleModelProperty =
+            DependencyProperty.Register("ScaleModel", typeof(LibraModel), typeof(LibraControl),
+                new PropertyMetadata(null, OnScaleModelChanged));
+
+        private static void OnScaleModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            LibraControl control = d as LibraControl;
+            if (control != null)
+            {
+                // Устанавливаем DataContext для всех биндингов внутри UserControl
+                control.DataContext = e.NewValue;
+            }
         }
     }
 }

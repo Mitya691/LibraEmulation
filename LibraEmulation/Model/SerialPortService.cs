@@ -15,33 +15,16 @@ namespace ScaleEmulator
         private DateTime _lastDataReceived;
         private DispatcherTimer _timeoutTimer;
 
-        // Сохраним фиксированный адрес, переданный из ViewModel
-        private byte _fixedAddress;
-
-        // Параметры, которые могут использоваться при формировании ответов (например, вес)
-        private double _currentWeight;
-        private bool _isUspokoenie;
-        private bool _isPereg;
-
         public event Action<string> LogMessage;
         public event Action<string> ErrorMessage;
         public event Action HandshakeCompleted;
 
-        public double CurrentWeight { get; set; }
-        public bool IsUspokoenie { get; set; }
-        public bool IsPereg { get; set; }
-        public bool IsReweighing { get; set; }
-        public bool HasError { get; set; }
-        public bool IsStopMode { get; set; }
-        public bool IsCycleComplete { get; set; }
-        public bool IsPaused { get; set; }
-        public bool IsLoading { get; set; }
-        public bool IsUnloading { get; set; }
-        public bool IsOnPass { get; set; }
+        private LibraModel _libraOne = new LibraModel(1);
+        private LibraModel _libraTwo = new LibraModel(2);
 
-        private CounterModel _counterModel = new CounterModel();
-        private LibraModel _libraOne = new LibraModel();
-        private LibraModel _libraTwo = new LibraModel();
+        public LibraModel LibraOne => _libraOne;
+        public LibraModel LibraTwo => _libraTwo;
+
 
         public SerialPortService()
         {
@@ -62,12 +45,8 @@ namespace ScaleEmulator
             }
         }
 
-        public void Start(string portName, int baudRate, Parity parity, byte fixedAddress, double weight, bool uspokoenie, bool pereg, double initialWeight)
+        public void Start(string portName, int baudRate, Parity parity)
         {
-            _fixedAddress = fixedAddress;
-            _currentWeight = weight;
-            _isUspokoenie = uspokoenie;
-            _isPereg = pereg;
             _serialPort = new SerialPort(portName, baudRate, parity, 8, StopBits.One);
             _serialPort.Open();
             _keepReading = true;
@@ -135,13 +114,13 @@ namespace ScaleEmulator
             {
                 if(adr == 0x01)
                 {
-                    byte[] response = _libraOne.CopA1Response();
+                    byte[] response = _libraOne.GetCopA1Response();
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Серийный номер) весы 1: " + BitConverter.ToString(response));
                 }
                 else if (adr == 0x02)
                 {
-                    byte[] response = _libraTwo.CopA1Response();
+                    byte[] response = _libraTwo.GetCopA1Response();
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Серийный номер) весы 2: " + BitConverter.ToString(response));
                 }
@@ -152,13 +131,13 @@ namespace ScaleEmulator
             {
                 if (adr == 0x01)
                 {
-                    byte[] response = _libraOne.CopC2Response();
+                    byte[] response = _libraOne.GetCopC2Response();
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Вес НЕТТО) весы 1: " + BitConverter.ToString(response));
                 }
                 else if (adr == 0x02)
                 {
-                    byte[] response = _libraTwo.CopC2Response();
+                    byte[] response = _libraTwo.GetCopC2Response();
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Вес НЕТТО) весы 2: " + BitConverter.ToString(response));
                 }
@@ -169,13 +148,13 @@ namespace ScaleEmulator
             {
                 if (adr == 0x01)
                 {
-                    byte[] response = _libraOne.CopC3Response();
+                    byte[] response = _libraOne.GetCopC3Response();
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Вес БРУТТО) весы 1: " + BitConverter.ToString(response));
                 }
                 else if (adr == 0x02)
                 {
-                    byte[] response = _libraTwo.CopC3Response();
+                    byte[] response = _libraTwo.GetCopC3Response();
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Вес БРУТТО) весы 2: " + BitConverter.ToString(response));
                 }
@@ -185,13 +164,13 @@ namespace ScaleEmulator
             {
                 if (adr == 0x01)
                 {
-                    byte[] response = _libraOne.CopBFResponse();
+                    byte[] response = _libraOne.GetCopBFResponse();
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Состояние BFh): " + BitConverter.ToString(response));
                 }
                 else if (adr == 0x02)
                 {
-                    byte[] response = _libraTwo.CopBFResponse();
+                    byte[] response = _libraTwo.GetCopBFResponse();
                     _serialPort.Write(response, 0, response.Length);
                     LogMessage?.Invoke("Отправлено (Состояние BFh): " + BitConverter.ToString(response));
                 }
@@ -206,14 +185,14 @@ namespace ScaleEmulator
                         if (adr == 0x01)
                         {
                             byte nw = buffer[3]; // NW – номер запрашиваемого счётчика
-                            byte[] response = _libraOne.CopC8Response(nw);
+                            byte[] response = _libraOne.GetCopC8Response(nw);
                             _serialPort.Write(response, 0, response.Length);
                             LogMessage?.Invoke("Отправлено (Счетчик C8h): " + BitConverter.ToString(response));
                         }
                         else if (adr == 0x02)
                         {
                             byte nw = buffer[3]; // NW – номер запрашиваемого счётчика
-                            byte[] response = _libraTwo.CopC8Response(nw);
+                            byte[] response = _libraTwo.GetCopC8Response(nw);
                             _serialPort.Write(response, 0, response.Length);
                             LogMessage?.Invoke("Отправлено (Счетчик C8h): " + BitConverter.ToString(response));
                         }

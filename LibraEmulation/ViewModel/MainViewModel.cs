@@ -50,11 +50,16 @@ namespace LibraEmulation
             set { _weight = value; OnPropertyChanged(nameof(Weight)); }
         }
 
-        private byte _fixedAddress;
-        public byte FixedAddress
+        public byte FixedAddressOne
         {
-            get => _fixedAddress;
-            set { _fixedAddress = value; OnPropertyChanged(nameof(FixedAddress)); }
+            get => _serialPortService.LibraOne.FixedAddress;
+            set { _serialPortService.LibraOne.FixedAddress = value; OnPropertyChanged(nameof(FixedAddressOne)); }
+        }
+
+        public byte FixedAddressTwo
+        {
+            get => _serialPortService.LibraTwo.FixedAddress;
+            set { _serialPortService.LibraTwo.FixedAddress = value; OnPropertyChanged(nameof(FixedAddressTwo)); }
         }
 
         public string LogText
@@ -67,47 +72,82 @@ namespace LibraEmulation
         // Свойства для эмуляции циклического взвешивания зерна
         // ---------------------------
         // Текущий вес, который вводится пользователем (в кг)
-        private double _currentWeight;
-        public double CurrentWeight
+        public double CurrentWeightOne
         {
-            get => _currentWeight;
+            get => _serialPortService.LibraOne.CurrentWeight;
             set
             {
-                if (_currentWeight != value)
+                if (_serialPortService.LibraOne.CurrentWeight != value)
                 {
-                    _currentWeight = value;
-                    OnPropertyChanged(nameof(CurrentWeight));
-                    _serialPortService.CurrentWeight = value; // синхронизируем с сервисом
+                    _serialPortService.LibraOne.CurrentWeight = value;
+                    OnPropertyChanged(nameof(CurrentWeightOne));
+                }
+            }
+        }
+
+        public double CurrentWeightTwo
+        {
+            get => _serialPortService.LibraTwo.CurrentWeight;
+            set
+            {
+                if (_serialPortService.LibraTwo.CurrentWeight != value)
+                {
+                    _serialPortService.LibraTwo.CurrentWeight = value;
+                    OnPropertyChanged(nameof(CurrentWeightTwo));
                 }
             }
         }
 
         // Накопленный вес за всё время работы (в кг)
-        private double _cumulativeWeight;
-        public double CumulativeWeight
+        public double CumulativeWeightOne
         {
-            get => _cumulativeWeight;
+            get => _serialPortService.LibraOne.CumulativeWeight;
             set
             {
-                if (_cumulativeWeight != value)
+                if (_serialPortService.LibraOne.CumulativeWeight != value)
                 {
-                    _cumulativeWeight = value;
-                    OnPropertyChanged(nameof(CumulativeWeight));
+                    _serialPortService.LibraOne.CumulativeWeight = value;
+                    OnPropertyChanged(nameof(CumulativeWeightOne));
+                }
+            }
+        }
+
+        public double CumulativeWeightTwo
+        {
+            get => _serialPortService.LibraTwo.CumulativeWeight;
+            set
+            {
+                if (_serialPortService.LibraTwo.CumulativeWeight != value)
+                {
+                    _serialPortService.LibraTwo.CumulativeWeight = value;
+                    OnPropertyChanged(nameof(CumulativeWeightTwo));
                 }
             }
         }
 
         // Производительность (в тоннах/час)
-        private double _performance;
-        public double Performance
+        public double PerformanceOne
         {
-            get => _performance;
+            get => _serialPortService.LibraOne.Performance;
             set
             {
-                if (_performance != value)
+                if (_serialPortService.LibraOne.Performance != value)
                 {
-                    _performance = value;
-                    OnPropertyChanged(nameof(Performance));
+                    _serialPortService.LibraOne.Performance = value;
+                    OnPropertyChanged(nameof(PerformanceOne));
+                }
+            }
+        }
+
+        public double PerformanceTwo
+        {
+            get => _serialPortService.LibraTwo.Performance;
+            set
+            {
+                if (_serialPortService.LibraTwo.Performance != value)
+                {
+                    _serialPortService.LibraTwo.Performance = value;
+                    OnPropertyChanged(nameof(PerformanceTwo));
                 }
             }
         }
@@ -133,160 +173,262 @@ namespace LibraEmulation
             set { _startStopButtonText = value; OnPropertyChanged(nameof(StartStopButtonText)); }
         }
 
-        private bool _isUspokoenie;
-        public bool IsUspokoenie
+        public bool IsUspokoenieOne
         {
-            get => _isUspokoenie;
+            get => _serialPortService.LibraOne.IsUspokoenie;
             set
             {
-                if (_isUspokoenie != value)
+                if (_serialPortService.LibraOne.IsUspokoenie != value)
                 {
-                    _isUspokoenie = value;
-                    OnPropertyChanged(nameof(IsUspokoenie));
-                    _serialPortService.IsUspokoenie = value; // синхронизируем с сервисом
+                    _serialPortService.LibraOne.IsUspokoenie = value;
+                    OnPropertyChanged(nameof(IsUspokoenieOne));
                 }
             }
         }
 
-        private bool _isPereg;
-        public bool IsPereg
+        public bool IsUspokoenieTwo
         {
-            get => _isPereg;
+            get => _serialPortService.LibraTwo.IsUspokoenie;
             set
             {
-                if (_isPereg != value)
+                if (_serialPortService.LibraTwo.IsUspokoenie != value)
                 {
-                    _isPereg = value;
-                    OnPropertyChanged(nameof(IsPereg));
-                    _serialPortService.IsPereg = value; // синхронизируем с сервисом
+                    _serialPortService.LibraTwo.IsUspokoenie = value;
+                    OnPropertyChanged(nameof(IsUspokoenieTwo));
                 }
             }
         }
 
-        private bool _isReweighing;
-        public bool IsReweighing
+        public bool IsPeregOne
         {
-            get => _isReweighing;
+            get => _serialPortService.LibraOne.IsPereg;
             set
             {
-                if (_isReweighing != value)
+                if (_serialPortService.LibraOne.IsPereg != value)
                 {
-                    _isReweighing = value;
-                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
-                    _serialPortService.IsReweighing = value;  // если вы реализовали аналогичное свойство в сервисе
-                    OnPropertyChanged(nameof(IsReweighing));
+                    _serialPortService.LibraOne.IsPereg = value;
+                    OnPropertyChanged(nameof(IsPeregOne));
                 }
             }
         }
 
-        private bool _hasError;
-        public bool HasError
+        public bool IsPeregTwo
         {
-            get => _hasError;
+            get => _serialPortService.LibraTwo.IsPereg;
             set
             {
-                if (_hasError != value)
+                if (_serialPortService.LibraTwo.IsPereg != value)
                 {
-                    _hasError = value;
-                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
-                    _serialPortService.HasError = value;  // если вы реализовали аналогичное свойство в сервисе
-                    OnPropertyChanged(nameof(HasError));
+                    _serialPortService.LibraTwo.IsPereg = value;
+                    OnPropertyChanged(nameof(IsPeregTwo));
                 }
             }
         }
 
-        private bool _isStopMode;
-        public bool IsStopMode
+        public bool IsReweighingOne
         {
-            get => _isStopMode;
+            get => _serialPortService.LibraOne.IsReweighing;
             set
             {
-                if (_isStopMode != value)
+                if (_serialPortService.LibraOne.IsReweighing != value)
                 {
-                    _isStopMode = value;
-                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
-                    _serialPortService.IsStopMode = value;  // если вы реализовали аналогичное свойство в сервисе
-                    OnPropertyChanged(nameof(IsStopMode));
+                    _serialPortService.LibraOne.IsReweighing = value;
+                    OnPropertyChanged(nameof(IsReweighingOne));
                 }
             }
         }
 
-        private bool _isCycleComplete;
-        public bool IsCycleComplete
+        public bool IsReweighingTwo
         {
-            get => _isCycleComplete;
+            get => _serialPortService.LibraTwo.IsReweighing;
             set
             {
-                if (_isCycleComplete != value)
+                if (_serialPortService.LibraTwo.IsReweighing != value)
                 {
-                    _isCycleComplete = value;
-                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
-                    _serialPortService.IsCycleComplete = value;  // если вы реализовали аналогичное свойство в сервисе
-                    OnPropertyChanged(nameof(IsCycleComplete));
+                    _serialPortService.LibraTwo.IsReweighing = value;
+                    OnPropertyChanged(nameof(IsReweighingTwo));
                 }
             }
         }
 
-        private bool _isPaused;
-        public bool IsPaused
+        public bool HasErrorOne
         {
-            get => _isPaused;
+            get => _serialPortService.LibraOne.HasError;
             set
             {
-                if (_isPaused != value)
+                if (_serialPortService.LibraOne.HasError != value)
                 {
-                    _isPaused = value;
-                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
-                    _serialPortService.IsPaused = value;  // если вы реализовали аналогичное свойство в сервисе
-                    OnPropertyChanged(nameof(IsPaused));
+                    _serialPortService.LibraOne.HasError = value;
+                    OnPropertyChanged(nameof(HasErrorOne));
                 }
             }
         }
 
-        private bool _isLoading;
-        public bool IsLoading
+        public bool HasErrorTwo
         {
-            get => _isLoading;
+            get => _serialPortService.LibraTwo.HasError;
             set
             {
-                if (_isLoading != value)
+                if (_serialPortService.LibraTwo.HasError != value)
                 {
-                    _isLoading = value;
-                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
-                    _serialPortService.IsLoading = value;  // если вы реализовали аналогичное свойство в сервисе
-                    OnPropertyChanged(nameof(IsLoading));
+                    _serialPortService.LibraTwo.HasError = value;
+                    OnPropertyChanged(nameof(HasErrorTwo));
                 }
             }
         }
 
-        private bool _isUnloading;
-        public bool IsUnloading
+        public bool IsStopModeOne
         {
-            get => _isUnloading;
+            get => _serialPortService.LibraOne.IsStopMode;
             set
             {
-                if (_isUnloading != value)
+                if (_serialPortService.LibraOne.IsStopMode != value)
                 {
-                    _isUnloading = value;
-                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
-                    _serialPortService.IsUnloading = value;  // если вы реализовали аналогичное свойство в сервисе
-                    OnPropertyChanged(nameof(IsUnloading));
+                    _serialPortService.LibraOne.IsStopMode = value;
+                    OnPropertyChanged(nameof(IsStopModeOne));
                 }
             }
         }
 
-        private bool _isOnPass;
-        public bool IsOnPass
+        public bool IsStopModeTwo
         {
-            get => _isOnPass;
+            get => _serialPortService.LibraTwo.IsStopMode;
             set
             {
-                if (_isOnPass != value)
+                if (_serialPortService.LibraTwo.IsStopMode != value)
                 {
-                    _isOnPass = value;
-                    // Обновляем значение в сервисе, чтобы команда BF использовала актуальное состояние
-                    _serialPortService.IsOnPass = value;  // если вы реализовали аналогичное свойство в сервисе
-                    OnPropertyChanged(nameof(IsOnPass));
+                    _serialPortService.LibraTwo.IsStopMode = value;
+                    OnPropertyChanged(nameof(IsStopModeTwo));
+                }
+            }
+        }
+
+        public bool IsCycleCompleteOne
+        {
+            get => _serialPortService.LibraOne.IsCycleComplete;
+            set
+            {
+                if (_serialPortService.LibraOne.IsCycleComplete != value)
+                {
+                    _serialPortService.LibraOne.IsCycleComplete = value;
+                    OnPropertyChanged(nameof(IsCycleCompleteOne));
+                }
+            }
+        }
+
+        public bool IsCycleCompleteTwo
+        {
+            get => _serialPortService.LibraTwo.IsCycleComplete;
+            set
+            {
+                if (_serialPortService.LibraTwo.IsCycleComplete != value)
+                {
+                    _serialPortService.LibraTwo.IsCycleComplete = value;
+                    OnPropertyChanged(nameof(IsCycleCompleteOne));
+                }
+            }
+        }
+
+        public bool IsPausedOne
+        {
+            get => _serialPortService.LibraOne.IsPaused;
+            set
+            {
+                if (_serialPortService.LibraOne.IsPaused != value)
+                {
+                    _serialPortService.LibraOne.IsPaused = value;
+                    OnPropertyChanged(nameof(IsPausedOne));
+                }
+            }
+        }
+
+        public bool IsPausedTwo
+        {
+            get => _serialPortService.LibraTwo.IsPaused;
+            set
+            {
+                if (_serialPortService.LibraTwo.IsPaused != value)
+                {
+                    _serialPortService.LibraTwo.IsPaused = value;
+                    OnPropertyChanged(nameof(IsPausedTwo));
+                }
+            }
+        }
+
+        public bool IsLoadingOne
+        {
+            get => _serialPortService.LibraOne.IsLoading;
+            set
+            {
+                if (_serialPortService.LibraOne.IsLoading != value)
+                {
+                    _serialPortService.LibraOne.IsLoading = value;
+                    OnPropertyChanged(nameof(IsLoadingOne));
+                }
+            }
+        }
+
+        public bool IsLoadingTwo
+        {
+            get => _serialPortService.LibraTwo.IsLoading;
+            set
+            {
+                if (_serialPortService.LibraTwo.IsLoading != value)
+                {
+                    _serialPortService.LibraTwo.IsLoading = value;
+                    OnPropertyChanged(nameof(IsLoadingTwo));
+                }
+            }
+        }
+
+        public bool IsUnloadingOne
+        {
+            get => _serialPortService.LibraOne.IsUnloading;
+            set
+            {
+                if (_serialPortService.LibraOne.IsUnloading != value)
+                {
+                    _serialPortService.LibraOne.IsUnloading = value;
+                    OnPropertyChanged(nameof(IsUnloadingOne));
+                }
+            }
+        }
+
+        public bool IsUnloadingTwo
+        {
+            get => _serialPortService.LibraTwo.IsUnloading;
+            set
+            {
+                if (_serialPortService.LibraTwo.IsUnloading != value)
+                {
+                    _serialPortService.LibraTwo.IsUnloading = value;
+                    OnPropertyChanged(nameof(IsUnloadingTwo));
+                }
+            }
+        }
+
+        public bool IsOnPassOne
+        {
+            get => _serialPortService.LibraOne.IsOnPass;
+            set
+            {
+                if (_serialPortService.LibraOne.IsOnPass != value)
+                {
+                    _serialPortService.LibraOne.IsOnPass = value;
+                    OnPropertyChanged(nameof(IsOnPassOne));
+                }
+            }
+        }
+
+        public bool IsOnPassTwo
+        {
+            get => _serialPortService.LibraTwo.IsOnPass;
+            set
+            {
+                if (_serialPortService.LibraTwo.IsOnPass != value)
+                {
+                    _serialPortService.LibraTwo.IsOnPass = value;
+                    OnPropertyChanged(nameof(IsOnPassTwo));
                 }
             }
         }
@@ -301,7 +443,6 @@ namespace LibraEmulation
             SelectedBaud = 9600;
             SelectedParity = Parity.None.ToString();
             Weight = 0.5;
-            FixedAddress = 20; // по умолчанию
 
             StartStopCommand = new RelayCommand(ExecuteStartStop);
 
@@ -315,9 +456,12 @@ namespace LibraEmulation
             };
 
             // Инициализируем свойства для эмуляции цикла
-            CurrentWeight = 0;
-            CumulativeWeight = 0;
-            Performance = 0;
+            CurrentWeightOne = 0;
+            CurrentWeightTwo = 0;
+            CumulativeWeightOne = 0;
+            CumulativeWeightTwo = 0;
+            PerformanceOne = 0;
+            PerformanceTwo = 0;
             _startTime = DateTime.Now;
 
             ResetCounterCommand = new RelayCommand(o => ResetCounter());
@@ -333,8 +477,8 @@ namespace LibraEmulation
         {
             // В цикле весы "накапливают" зерно.
             // Здесь мы прибавляем текущий вес (введённый пользователем) к накопленному значению.
-            CumulativeWeight += CurrentWeight;
-
+            CumulativeWeightOne += CurrentWeightOne;
+            CumulativeWeightTwo += CurrentWeightTwo;
             // Можно также сбрасывать CurrentWeight после цикла, если симулируется разрядка зерна:
             // CurrentWeight = 0;
 
@@ -342,7 +486,8 @@ namespace LibraEmulation
             UpdatePerformance();
 
             // Логируем событие цикла
-            LogText += $"{DateTime.Now:HH:mm:ss} Цикл завершён. Накоплено: {CumulativeWeight} кг\n";
+            LogText += $"{DateTime.Now:HH:mm:ss} Цикл завершён. Накоплено(весы 1): {CumulativeWeightOne} кг\n";
+            LogText += $"{DateTime.Now:HH:mm:ss} Цикл завершён. Накоплено(весы 2): {CumulativeWeightTwo} кг\n";
         }
 
         // Расчёт производительности (тонн/час)
@@ -352,16 +497,19 @@ namespace LibraEmulation
             if (elapsedHours > 0)
             {
                 // Преобразуем накопленный вес в тонны (1 тонна = 1000 кг)
-                Performance = (CumulativeWeight / 1000) / elapsedHours;
+                PerformanceOne = (CumulativeWeightOne / 1000) / elapsedHours;
+                PerformanceTwo = (CumulativeWeightTwo / 1000) / elapsedHours;
             }
         }
 
         // Команда сброса накопленного счетчика
         private void ResetCounter()
         {
-            CumulativeWeight = 0;
+            CumulativeWeightOne = 0;
+            CurrentWeightTwo = 0;
             _startTime = DateTime.Now;
-            Performance = 0;
+            PerformanceOne = 0;
+            PerformanceTwo = 0;
             LogText += $"{DateTime.Now:HH:mm:ss} Счетчик сброшен.\n";
         }
 
@@ -373,8 +521,7 @@ namespace LibraEmulation
                 {
                     // Запускаем подключение к COM-порту через сервис
                     _serialPortService.Start(SelectedPort, SelectedBaud,
-                        (Parity)Enum.Parse(typeof(Parity), SelectedParity),
-                        FixedAddress, Weight, IsUspokoenie, IsPereg, Weight);
+                        (Parity)Enum.Parse(typeof(Parity), SelectedParity));
                     _isConnected = true;
 
                     // Обновляем UI – меняем текст кнопки и логгируем

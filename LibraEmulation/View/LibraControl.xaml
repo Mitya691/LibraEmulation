@@ -5,8 +5,93 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:LibraEmulation.View"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="300" d:DesignWidth="400">
+    <!-- Корневой Grid с тремя строками: заголовок, основная область и футер -->
     <Grid>
-            
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Заголовок -->
+            <RowDefinition Height="*"/>
+            <!-- Основная область (чекбоксы) -->
+            <RowDefinition Height="Auto"/>
+            <!-- Футер -->
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок: вес, фикс. адрес и номер весов -->
+        <Grid Grid.Row="0" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <!-- Верхняя строка: Вес и Фикс. адрес -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Вес (кг):" FontSize="13" VerticalAlignment="Center" Height="17" Margin="5"/>
+                <TextBox Grid.Column="1" Text="{Binding CurrentWeight, UpdateSourceTrigger=PropertyChanged}" 
+                 Height="20" Width="80" Margin="5"/>
+                <TextBlock Grid.Column="2" Text="Фикс. адрес:" FontSize="13" VerticalAlignment="Center" 
+                   Height="17" HorizontalAlignment="Right" Margin="5"/>
+                <!-- Если для фиксированного адреса нужен отдельный биндинг, замените привязку на нужное свойство -->
+                <TextBox Grid.Column="3" Text="{Binding FixedAddress, UpdateSourceTrigger=PropertyChanged}"  
+                 Width="80" Height="20" Margin="5"/>
+            </Grid>
+            <!-- Нижняя строка: номер весов -->
+            <TextBlock Grid.Row="0" Text="Весы #:" FontSize="13" VerticalAlignment="Center" 
+                 Height="17" HorizontalAlignment="Center" Margin="5"/>
+        </Grid>
+
+        <!-- Основная область: блок с CheckBox -->
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <!-- Левая колонка -->
+            <CheckBox Grid.Row="0" Content="На проход (D0)" IsChecked="{Binding IsOnPass, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Grid.Row="1" Content="Разгрузка (D1)" IsChecked="{Binding IsUnloading, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Grid.Row="2" Content="Загрузка (D2)" IsChecked="{Binding IsLoading, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Grid.Row="3" Content="Пауза/Блокировка (D3)" IsChecked="{Binding IsPaused, Mode=TwoWay}" Margin="5"/>
+            <!-- Правая колонка -->
+            <CheckBox Grid.Row="0" Grid.Column="1" Content="Цикл набора завершен (D4)" IsChecked="{Binding IsCycleComplete, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Grid.Row="1" Grid.Column="1" Content="Режим 'СТОП' (D5)" IsChecked="{Binding IsStopMode, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Grid.Row="2" Grid.Column="1" Content="Ошибка (D6)" IsChecked="{Binding HasError, Mode=TwoWay}" Margin="5"/>
+            <CheckBox Grid.Row="3" Grid.Column="1" Content="Режим перевешивания (D7)" IsChecked="{Binding IsReweighing, Mode=TwoWay}" Margin="5,5,16,5" Width="179"/>
+        </Grid>
+
+        <!-- Футер: накопленный вес, производительность и кнопка сброса -->
+        <Grid Grid.Row="2" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Накопленный вес:" VerticalAlignment="Center" Height="16" Margin="5"/>
+            <Border Grid.Row="0" Grid.Column="1" BorderBrush="Black" BorderThickness="1" CornerRadius="1" 
+              Height="20" Width="200" HorizontalAlignment="Left" Margin="5">
+                <TextBlock Text="{Binding CumulativeWeight}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+            </Border>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Производительность:" VerticalAlignment="Center" Height="16" Margin="5"/>
+            <Border Grid.Row="1" Grid.Column="1" BorderBrush="Black" BorderThickness="1" CornerRadius="1" 
+              Height="20" Width="200" HorizontalAlignment="Left" Margin="5">
+                <TextBlock Text="{Binding Performance}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+            </Border>
+            <Button Grid.Row="2" Grid.ColumnSpan="2" Content="Сброс счетчика" Command="{Binding ResetCounterCommand}" 
+              Height="23" Width="94" HorizontalAlignment="Center" Margin="5"/>
+        </Grid>
     </Grid>
 </UserControl>
